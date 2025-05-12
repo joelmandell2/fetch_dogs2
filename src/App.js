@@ -4,6 +4,8 @@ import { indigo, amber } from '@mui/material/colors'
 import { createTheme } from "@mui/material/styles";
 
 import SecurityPage from './pages/SecurityPage';
+import HomePage from './pages/HomePage';
+
 
 
 // createTheme enables you to customize the look and feel of your app past the default
@@ -26,6 +28,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<SecurityPage />} />
+          <Route path="/dogs" element={<HomePage/>}/>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
