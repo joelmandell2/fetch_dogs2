@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TablePagination
 export default function HomePage(){
 
     const [dogData, setDogData] = useState([]);
-    const [orderByAsc, setOrderByAsc] = useState(True);
+    const [dogIds, setDogIds] = useState([]);
+    const [orderByAsc, setOrderByAsc] = useState(true);
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
@@ -39,41 +40,83 @@ export default function HomePage(){
     // field = key within json
     // headerName = how it's displayed
     const dogColumns = [
+        // {
+        //     field: favorite,
+        //     headerName: 'Favrorite'
+        // },
         {
-            field: favorite,
-            headerName: 'Favrorite'
-        },
-        {
-            field: id,
+            field: 'img',
             headerName: 'image',
         },
+         {
+            field: 'breed',
+            headerName: 'Breed',
+        },
         {
-            field: name,
+            field: 'name',
             headerName: 'Name',
         },
         {
-            field: age,
+            field: 'age',
             headerName: 'Age',
         },
         {
-            field: zip_code,
+            field: 'zip_code',
             headerName: 'Zip Code',
         },
-        {
-            field: breed,
-            headerName: 'Breed',
-        },
+       
         
 
     ];
 
+    async function test(){
+        console.log('fetching test');
+        const val = await fetch(`https://frontend-take-home-service.fetch.com/dogs/search`,{
+            method: 'GET',
+            credentials: 'include'
+        });
+        console.log(val, 'returned val');
+            
+    }
+
+    test();
 
     useEffect(
         ()=> {
             // make sure when you get results you add a favorite field
-            fetch(`https://frontend-take-home-service.fetch.com/dogs/search`)
+
+            // dogs/search gets you dog ids
+            // dogs/breeds gets you breed names
+
+
+            fetch(`https://frontend-take-home-service.fetch.com/dogs/search`,
+                {method: 'GET',
+                credentials: 'include',})
             .then(res => res.json())
-            .then(resJson => setDogData(resJson));
+            .then(resJson => {
+                
+                setDogIds(resJson.resultIds);
+                // fetch the dog information for each dog id 
+                fetch(`https://frontend-take-home-service.fetch.com/dogs`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-type': 'application/JSON'
+                        },
+                        body:JSON.stringify(resJson),
+                        credentials: 'include'
+
+                    }
+                )
+                .then(res2 => res2.json())
+                .then(resJson2 => {
+                    setDogData(resJson2);
+                console.log(dogData, ' dog dataa');
+                console.log(resJson2, 'resJson2')
+            });
+            });
+            // once you get dog ids with number you want then you post those ids and get the results
+
         }, []
     );
 
@@ -264,10 +307,17 @@ export default function HomePage(){
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {dogData.map(col => {
-                        
-
-                    })
+                    {dogData.map((row, idx) => 
+                    <TableRow key={idx}>
+                        {
+                            dogColumns.map(col=> 
+                                <TableCell key={col.headerName}>
+                                    {col.renderCell ? col.renderCell(row) : defaultRenderCell(col, row)}
+                                </TableCell>
+                            )
+                        }
+                    </TableRow>
+                    )
                     }
                 </TableBody>
             </Table>
