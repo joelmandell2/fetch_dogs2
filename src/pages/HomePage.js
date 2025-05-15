@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Container, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import { Container, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, Link, TableRow } from '@mui/material';
 
 
 export default function HomePage(){
 
-    // todo: (be able to switch asc or desc)
     // todo: favorites (return match form /dogs/match)
     // todo: paginated
     // todo: fix image
     // todo: style
     // todo: dog page
-    const [sortOn, setSortOn] = useState();
+    const [sortOn, setSortOn] = useState('asc');
     const [anyTimes, setAnyTimes] = useState(0);
     const [dogData, setDogData] = useState([]);
     const [breeds, setBreeds] = useState([]);
@@ -44,7 +43,13 @@ export default function HomePage(){
 //     age: number
 //     zip_code: string
 //     breed: string
-
+    const adjustSort =() =>{
+        if(sortOn == 'asc'){
+            setSortOn('desc');
+            return;
+        } setSortOn('asc');
+        return;
+    };
 
     // make sure to add a favorite field
     // field = key within json
@@ -89,7 +94,7 @@ export default function HomePage(){
             
 
 
-            fetch(`https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:asc`,
+            fetch(`https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:${sortOn}`,
                 {method: 'GET',
                 credentials: 'include',})
             .then(res => res.json())
@@ -135,7 +140,7 @@ export default function HomePage(){
             const selected_arr = [selectedBreed]
             const breedP = selected_arr.map(selected_arr => `breeds=${encodeURIComponent(selected_arr)}`).join('&');
             console.log(breedP, ' breed Parameter being passed in');
-            const url = `https://frontend-take-home-service.fetch.com/dogs/search?${breedP}&sort=breed:asc`;
+            const url = `https://frontend-take-home-service.fetch.com/dogs/search?${breedP}&sort=breed:${sortOn}`;
             console.log(url, ' url being fetched');
             fetch(url,
                     {
@@ -154,7 +159,7 @@ export default function HomePage(){
                 
         })
         } else if(anyTimes > 0){
-            const url = `https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:asc`;
+            const url = `https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:${sortOn}`;
             fetch(url,
                     {
                         method: 'GET',
@@ -171,7 +176,7 @@ export default function HomePage(){
                 
         })
         }
-    }, [selectedBreed]);
+    }, [selectedBreed, sortOn]);
 
     useEffect(() => {
         console.log(dogData, ' dog data before');
@@ -208,11 +213,29 @@ const handleChange = (event) => {
 
 // default way to render cell
  const defaultRenderCell = (col, row) => {
+     if (col.field === 'img') {
+        return (
+            <img 
+                src={row[col.field]} 
+                alt="dog" 
+                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} 
+            />
+        );
+    }
     return <div>{row[col.field]}</div>;
   }
 
   /*  */
 
+  function checkHead(name){
+    if (name == 'Breed'){
+        if(sortOn == 'asc'){
+            setSortOn('desc');
+        } else if(sortOn == 'desc'){
+            setSortOn('asc');
+        }
+    }
+  }
 
 
 
@@ -240,7 +263,7 @@ return(
             <Table>
                 <TableHead>
                     <TableRow>
-                        {dogColumns.map(col => <TableCell key={col.headerName}>{col.headerName}</TableCell>)}
+                        {dogColumns.map(col => <TableCell key={col.headerName} style={{cursor: col.headerName == 'Breed'? 'pointer' : 'default'}} onClick={() => checkHead(col.headerName)}>{col.headerName}</TableCell>)}
                     </TableRow>
                 </TableHead>
                 <TableBody>
