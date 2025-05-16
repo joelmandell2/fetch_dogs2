@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Card, CardContent, ButtonGroup, Modal } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, ButtonGroup, Modal } from '@mui/material';
 
 
 export default function FavoriteCard({dogIds, handleClose}){
@@ -58,7 +58,11 @@ export default function FavoriteCard({dogIds, handleClose}){
 
     const dogD = () => {
         if(favDogData && favDogData.length > 0){
-            return <p>{favDogData[0].age}, {favDogData[0].breed} {favDogData[0].img} {favDogData[0].name} {favDogData[0].zip_code}</p>;
+            return <div>
+                <Typography align='center'>{favDogData[0].age} Years Old </Typography>
+                <Typography align='center'>{favDogData[0].breed} </Typography>
+                <Typography align='center'>Zip Code: {favDogData[0].zip_code} </Typography>
+            </div>
         }
     };
     return(
@@ -68,13 +72,14 @@ export default function FavoriteCard({dogIds, handleClose}){
         style={{display:'flex', justifyContent: 'center', alignItems: 'center'}}>
         <Box  
         p={3}
-        style={{ background: 'white', borderRadius: '16px', border: '2px solid #000', width: 600 }}
+        style={{ background: 'green', borderRadius: '16px', border: '2px solid #000', width: 600, display:'flex', alignItems: 'center', justifyContent: 'center', }}
         >   
-        {favDogData && favDogData.length > 0 ? (<img src={favDogData[0].img}/>) : <p> </p> }
-        <Card>
+        <Card sx={{backgroundColor: 'white'}}>
         <CardContent>
+        {favDogData && favDogData.length > 0 ? (<Typography variant="h5" align="center" sx={{mb:2}}>{favDogData[0].name}</Typography>) : <p> </p> }
+
         
-        {favDogData && favDogData.length > 0 ? (<img src={favDogData[0].img}/>) : <p> loading</p> }
+        {favDogData && favDogData.length > 0 ? (<img src={favDogData[0].img}/>) : <p> Matching</p> }
         {dogD()}
 
         </CardContent>

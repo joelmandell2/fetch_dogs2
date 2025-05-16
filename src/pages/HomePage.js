@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Box, Button, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, Link, TableRow } from '@mui/material';
+import { Container, Card, Box, Button, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, Link, TableRow } from '@mui/material';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import FavoriteCard from './FavoriteCard';
@@ -11,7 +11,7 @@ export default function HomePage(){
     // todo: style
     const [sortOn, setSortOn] = useState('asc');
     const [anyTimes, setAnyTimes] = useState(0);
-    const [rowsPerPageOptions, setRowsPerPageOptions] = useState([5, 10]);
+    const [rowsPerPageOptions, setRowsPerPageOptions] = useState([5, 10, 25]);
     const [dogData, setDogData] = useState([]);
     const [breeds, setBreeds] = useState([]);
     const [dogIds, setDogIds] = useState([]);
@@ -20,8 +20,9 @@ export default function HomePage(){
     const[favoriteIds, setFavoriteIds] = useState(new Set());
     const [favoriteCard, setFavoriteCard] = useState(false);
 
+
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(50);
+    const [pageSize, setPageSize] = useState(25);
 
     // use a table with a bunch of filtering abilities on top
 
@@ -123,13 +124,15 @@ export default function HomePage(){
             // dogs/search gets you dog ids
             // dogs/breeds gets you breed names
             
-
-
-            fetch(`https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:${sortOn}`,
+            // do page * numPerPage and do from
+            const offset = page * pageSize;
+            fetch(`https://frontend-take-home-service.fetch.com/dogs/search?size=${pageSize}&from=${offset}&sort=breed:${sortOn}`,
                 {method: 'GET',
                 credentials: 'include',})
             .then(res => res.json())
             .then(resJson => {
+                console.log(resJson.next, ' next query');
+                console.log(resJson.prev, ' prev query');
                 setDogIds(resJson.resultIds);
 
                 // fetch the dog information for each dog id 
@@ -142,7 +145,7 @@ export default function HomePage(){
                 setBreeds(resJson)});
                 
             });
-            }, []);
+            }, [pageSize]);
 
 
            
@@ -171,7 +174,8 @@ export default function HomePage(){
             const selected_arr = [selectedBreed]
             const breedP = selected_arr.map(selected_arr => `breeds=${encodeURIComponent(selected_arr)}`).join('&');
             console.log(breedP, ' breed Parameter being passed in');
-            const url = `https://frontend-take-home-service.fetch.com/dogs/search?${breedP}&sort=breed:${sortOn}`;
+            const offset = page * pageSize;
+            let url = `https://frontend-take-home-service.fetch.com/dogs/search?${breedP}&size=${pageSize}&from=${offset}&sort=breed:${sortOn}`;
             console.log(url, ' url being fetched');
             fetch(url,
                     {
@@ -186,11 +190,14 @@ export default function HomePage(){
                 .then(res2 => res2.json())
                 .then(resJson2 => {
                     console.log(resJson2, ' Response from filtered search');
+                    console.log(resJson2.next, ' next query');
+                    console.log(resJson2.prev, ' prev query');
                     setDogIds(resJson2.resultIds);
                 
         })
         } else if(anyTimes >= 0){
-            const url = `https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:${sortOn}`;
+            const off = page * pageSize;
+            let url = `https://frontend-take-home-service.fetch.com/dogs/search?size=${pageSize}&from=${off}&sort=breed:${sortOn}`;
             fetch(url,
                     {
                         method: 'GET',
@@ -203,11 +210,14 @@ export default function HomePage(){
                 )
                 .then(res2 => res2.json())
                 .then(resJson2 => {
+                    console.log(resJson2.next, ' next query');
+                    console.log(resJson2.prev, ' prev query');
                     setDogIds(resJson2.resultIds);
+                    console.log(resJson2.resultIds, ' result ids');
                 
         })
         }
-    }, [selectedBreed, sortOn]);
+    }, [selectedBreed, sortOn, pageSize, page]);
 
     useEffect(() => {
         console.log(dogData, ' dog data before');
@@ -290,10 +300,11 @@ const handleChange = (event) => {
 
 
 return(
-    <Container>
+    <Container  sx={{backgroundColor:'orange'}}>
+        <Card sx={{backgroundColor:'white', mt: 2}}>
         {favoriteCard && <FavoriteCard dogIds={favoriteIds} handleClose={() => setFavoriteCard(false)}/>}
-        <Box sx={{display:'flex'}}>
-         <FormControl sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 5, width:'250px'}}>
+        <Box sx={{display:'flex', alignItems: 'center', justifyContent: 'center', gap: .5}}>
+         <FormControl sx={{ mt: 5, width: '250px' }}>
                 <InputLabel id="breed-select-label">Breed</InputLabel>
                 <Select
                     labelId="breed-select-label"
@@ -310,7 +321,7 @@ return(
                     ))}
                 </Select>
             </FormControl>
-            <Button onClick={fetchMatch}>Match</Button>
+            <Button sx={{mt:5.5}}onClick={fetchMatch}>Match</Button>
         </Box>
             
     <TableContainer>
@@ -344,6 +355,7 @@ return(
                 />
             </Table>
     </TableContainer>
+    </Card>
     </Container>
 );
 }
