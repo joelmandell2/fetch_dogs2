@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { Container, Box, Button, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, Link, TableRow } from '@mui/material';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
+import FavoriteCard from './FavoriteCard';
 
 export default function HomePage(){
 
     // todo: favorites (return match form /dogs/match)
     // todo: paginated
     // todo: style
-    // todo: dog page
     const [sortOn, setSortOn] = useState('asc');
     const [anyTimes, setAnyTimes] = useState(0);
     const [rowsPerPageOptions, setRowsPerPageOptions] = useState([5, 10]);
@@ -18,6 +18,7 @@ export default function HomePage(){
     const [orderByAsc, setOrderByAsc] = useState(true);
     const [selectedBreed, setSelectedBreed] = useState('Any');
     const[favoriteIds, setFavoriteIds] = useState(new Set());
+    const [favoriteCard, setFavoriteCard] = useState(false);
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
@@ -282,9 +283,15 @@ const handleChange = (event) => {
   }
 
 
+  const fetchMatch = () => {
+    setFavoriteCard(true);
+  };
+
+
 
 return(
     <Container>
+        {favoriteCard && <FavoriteCard dogIds={favoriteIds} handleClose={() => setFavoriteCard(false)}/>}
         <Box sx={{display:'flex'}}>
          <FormControl sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 5, width:'250px'}}>
                 <InputLabel id="breed-select-label">Breed</InputLabel>
@@ -303,7 +310,7 @@ return(
                     ))}
                 </Select>
             </FormControl>
-            <Button>Match</Button>
+            <Button onClick={fetchMatch}>Match</Button>
         </Box>
             
     <TableContainer>
