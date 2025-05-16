@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Container, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, Link, TableRow } from '@mui/material';
-
+import { Container, Box, Button, FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, Link, TableRow } from '@mui/material';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarIcon from '@mui/icons-material/Star';
 
 export default function HomePage(){
 
     // todo: favorites (return match form /dogs/match)
+        // when you hit a favorite add favorite.id to the favorites id
     // todo: paginated
-    // todo: fix image
     // todo: style
     // todo: dog page
     const [sortOn, setSortOn] = useState('asc');
@@ -16,6 +17,7 @@ export default function HomePage(){
     const [dogIds, setDogIds] = useState([]);
     const [orderByAsc, setOrderByAsc] = useState(true);
     const [selectedBreed, setSelectedBreed] = useState('Any');
+    const[favoriteIds, setFavoriteIds] = useState(new Set());
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
@@ -51,6 +53,14 @@ export default function HomePage(){
         return;
     };
 
+    function addFav(row){
+        favoriteIds.add(row.id);
+    };
+
+    function removeFav(row){
+        favoriteIds.delete(row.id);
+    };
+
     // make sure to add a favorite field
     // field = key within json
     // headerName = how it's displayed
@@ -60,8 +70,28 @@ export default function HomePage(){
         //     headerName: 'Favrorite'
         // },
         {
+            field: 'favorite',
+            headerName: 'Favorite',
+            renderCell: (row) => {
+                return favoriteIds.has(row.id) ? (
+                    <StarIcon style={{cursor:'pointer'}} onClick={ () => {
+                        const copySet = new Set(favoriteIds);
+                        copySet.add(row.id);
+                        setFavoriteIds(copySet);
+                    }}/>
+                ) : (
+                    <StarBorderIcon style={{cursor:'pointer'}} onClick={() => {
+                        const copySet = new Set(favoriteIds);
+                        copySet.delete(row.id);
+                        setFavoriteIds(copySet);
+                    }}/>
+                );
+            }
+
+        },
+        {
             field: 'img',
-            headerName: 'image',
+            headerName: 'Picture',
         },
          {
             field: 'breed',
@@ -241,6 +271,7 @@ const handleChange = (event) => {
 
 return(
     <Container>
+        <Box sx={{display:'flex'}}>
          <FormControl sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 5, width:'250px'}}>
                 <InputLabel id="breed-select-label">Breed</InputLabel>
                 <Select
@@ -258,6 +289,8 @@ return(
                     ))}
                 </Select>
             </FormControl>
+            <Button>Match</Button>
+        </Box>
             
     <TableContainer>
             <Table>
