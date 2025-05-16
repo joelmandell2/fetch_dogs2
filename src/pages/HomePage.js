@@ -6,12 +6,12 @@ import StarIcon from '@mui/icons-material/Star';
 export default function HomePage(){
 
     // todo: favorites (return match form /dogs/match)
-        // when you hit a favorite add favorite.id to the favorites id
     // todo: paginated
     // todo: style
     // todo: dog page
     const [sortOn, setSortOn] = useState('asc');
     const [anyTimes, setAnyTimes] = useState(0);
+    const [rowsPerPageOptions, setRowsPerPageOptions] = useState([5, 10]);
     const [dogData, setDogData] = useState([]);
     const [breeds, setBreeds] = useState([]);
     const [dogIds, setDogIds] = useState([]);
@@ -76,13 +76,13 @@ export default function HomePage(){
                 return favoriteIds.has(row.id) ? (
                     <StarIcon style={{cursor:'pointer'}} onClick={ () => {
                         const copySet = new Set(favoriteIds);
-                        copySet.add(row.id);
+                        copySet.delete(row.id);
                         setFavoriteIds(copySet);
                     }}/>
                 ) : (
                     <StarBorderIcon style={{cursor:'pointer'}} onClick={() => {
                         const copySet = new Set(favoriteIds);
-                        copySet.delete(row.id);
+                        copySet.add(row.id);
                         setFavoriteIds(copySet);
                     }}/>
                 );
@@ -188,7 +188,7 @@ export default function HomePage(){
                     setDogIds(resJson2.resultIds);
                 
         })
-        } else if(anyTimes > 0){
+        } else if(anyTimes >= 0){
             const url = `https://frontend-take-home-service.fetch.com/dogs/search?sort=breed:${sortOn}`;
             fetch(url,
                     {
@@ -229,11 +229,25 @@ export default function HomePage(){
 
                 
         })
-    }, [dogIds]);
-
+    }, [dogIds, sortOn]);
+const handleChangePageSize = (e) => {
+    // when handling events such as changing a selection box or typing into a text box,
+    // the handler is called with parameter e (the event) and the value is e.target.value
+    const newPageSize = e.target.value;
+    setPageSize(newPageSize);
+    setPage(1);
+    // TODO (TASK 18): set the pageSize state variable and reset the current page to 1
+  }
 
  
-
+const handleChangePage = (e, newPage) => {
+    // Can always go to previous page (TablePagination prevents negative pages)
+    // but only fetch next page if we haven't reached the end (currently have full page of data)
+    if (newPage < page || dogData.length === pageSize) {
+      // Note that we set newPage + 1 since we store as 1 indexed but the default pagination gives newPage as 0 indexed
+      setPage(newPage + 1);
+    }
+  }
 
 const handleChange = (event) => {
     setSelectedBreed(event.target.value);
@@ -313,6 +327,14 @@ return(
                     )
                     }
                 </TableBody>
+                <TablePagination
+                rowsPerPageOptions={rowsPerPageOptions ?? [5, 10, 25]}
+                count={-1}
+                rowsPerPage={pageSize}
+                page={page - 1}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangePageSize}
+                />
             </Table>
     </TableContainer>
     </Container>
